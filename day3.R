@@ -27,3 +27,34 @@ for (h in 1:length(inst)) {
 }
 
 sum(vec_max)
+
+# star 2
+
+max_battery <- function (row, d) {
+  digits <- strsplit(row, "")[[1]]
+  n <- length(digits)
+
+  remove <- n - d
+  pila <- character(0)
+
+  for (i in digits){
+    while(length(pila)> 0 && remove > 0 && tail(pila ,1) < i ){
+      pila <- head(pila, -1)
+      remove <- remove - 1
+    }
+    pila <- c(pila, i)
+  }
+
+  if (length(pila) > d) {
+    pila <- pila[1:d]
+  }
+  paste0(pila, collapse = "")
+}
+
+
+vec_max <- vector()
+for (rows in 1:length(inst)) {
+  res <- max_battery(inst[rows], 12)
+  vec_max <- append(vec_max, as.numeric(res))
+}
+format(sum(vec_max), scientific = FALSE)
