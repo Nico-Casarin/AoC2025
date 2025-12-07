@@ -1,5 +1,6 @@
 # lib
 
+library(purrr)
 
 # import
 
@@ -28,7 +29,38 @@ for (i in seq_along(ranges)){
 spoiled_fun <- function (value, ranges){
   any(sapply(ranges, function(r) value >= r[1] && value <= r[2]))
 }
-codes$spoiled <- purrr::map_lgl(codes$codes, ~ spoiled_fun(.x, spoiled ))
+codes$spoiled <- map_lgl(codes$codes, ~ spoiled_fun(.x, spoiled ))
 sum(codes$spoiled[codes$spoiled == TRUE])
 
 # Star 2
+
+spoiled <- spoiled[order(sapply(spoiled,head,1))]
+
+overlapper <- function (lst){
+
+  #lst <- lst[order(sapply(lst, `[[`, 1)), ]
+  lst <- lst[order(sapply(spoiled,head,1))]
+
+  res <- list()
+    res <- list(lst[[1]])
+  
+  for (i in 2:length(lst)) {
+    last <- res[[length(res)]]
+    curr <- lst[[i]]
+    
+    if (curr[[1]] <= last[[2]]) {
+      last[[2]] <- max(last[[2]], curr[[2]])
+      res[[length(res)]] <- last
+    } else {
+      res[[length(res) + 1]] <- curr
+    }
+  }
+  res
+}
+
+ranges <- overlapper(spoiled)
+totale <- 0
+for (range in ranges){
+  print(length(range[1]:range[2]))
+  totale <- length(range[1]:range[2])+totale
+}
