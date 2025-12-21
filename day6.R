@@ -19,8 +19,49 @@ df_unnest <-
 
 df_unnest[,1:4] <-  sapply(df_unnest[,1:4], as.numeric)
 
+# star 1
+
 df_unnest |> 
   mutate(
     res = ifelse(e=="+", a+b+c+d, (a*b*c*d))
   ) |> 
   summarise(sum(res))
+
+# star 2
+
+
+rows_num <- inst[1:4]
+row_op   <- inst[5]
+
+W <- max(nchar(c(rows_num, row_op)))
+rows_num <- str_pad(rows_num, W, side = "right", pad = " ")
+row_op   <- str_pad(row_op,   W, side = "right", pad = " ")
+
+grid <- rbind(
+  str_split(rows_num[1], "", simplify = TRUE),
+  str_split(rows_num[2], "", simplify = TRUE),
+  str_split(rows_num[3], "", simplify = TRUE),
+  str_split(rows_num[4], "", simplify = TRUE),
+  str_split(row_op,      "", simplify = TRUE)
+)
+is_sep <- apply(grid, 2, function(col) all(col == " "))
+
+cols <- seq_len(W)
+blocks <- split(cols[!is_sep], cumsum(is_sep)[!is_sep])
+
+block_value <- function(block_cols) {
+  op <- grid[5, block_cols[1]] 
+
+  nums <- c()
+  for (j in rev(block_cols)) {
+    s <- paste0(grid[1:4, j], collapse = "")
+    s <- gsub(" ", "", s)
+    if (nchar(s) == 0) next
+    nums <- c(nums, as.integer(s))
+  }
+
+  if (op == "+") sum(nums) else prod(nums)
+}
+
+res_star2 <- sum(vapply(blocks, block_value, numeric(1)))
+res_star2
